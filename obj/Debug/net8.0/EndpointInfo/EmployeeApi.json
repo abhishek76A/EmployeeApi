@@ -5,7 +5,7 @@
     "version": "1.0"
   },
   "paths": {
-    "/api/Employees": {
+    "/api/Employees/all": {
       "get": {
         "tags": [
           "Employees"
@@ -15,7 +15,32 @@
             "description": "OK"
           }
         }
-      },
+      }
+    },
+    "/api/Employees/details/{id}": {
+      "get": {
+        "tags": [
+          "Employees"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Employees/add": {
       "post": {
         "tags": [
           "Employees"
@@ -46,8 +71,8 @@
         }
       }
     },
-    "/api/Employees/{id}": {
-      "get": {
+    "/api/Employees/remove/{id}": {
+      "delete": {
         "tags": [
           "Employees"
         ],
@@ -67,8 +92,10 @@
             "description": "OK"
           }
         }
-      },
-      "delete": {
+      }
+    },
+    "/api/Employees/update/{id}": {
+      "put": {
         "tags": [
           "Employees"
         ],
@@ -83,6 +110,25 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Employee"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Employee"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Employee"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -146,6 +192,30 @@
           "salary": {
             "type": "number",
             "format": "double"
+          },
+          "created_by": {
+            "type": "string",
+            "nullable": true
+          },
+          "created_ts": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modified_by": {
+            "type": "string",
+            "nullable": true
+          },
+          "modified_ts": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "flag": {
+            "type": "string"
+          },
+          "active": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false

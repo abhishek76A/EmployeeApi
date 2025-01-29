@@ -1,18 +1,8 @@
 [
   {
     "ContainingType": "EmployeeApi.Models.EmployeesController",
-    "Method": "GetEmployees",
-    "RelativePath": "api/Employees",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "EmployeeApi.Models.EmployeesController",
     "Method": "AddEmployee",
-    "RelativePath": "api/Employees",
+    "RelativePath": "api/Employees/add",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -27,8 +17,18 @@
   },
   {
     "ContainingType": "EmployeeApi.Models.EmployeesController",
+    "Method": "GetEmployees",
+    "RelativePath": "api/Employees/all",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "EmployeeApi.Models.EmployeesController",
     "Method": "GetEmployeeById",
-    "RelativePath": "api/Employees/{id}",
+    "RelativePath": "api/Employees/details/{id}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -44,7 +44,7 @@
   {
     "ContainingType": "EmployeeApi.Models.EmployeesController",
     "Method": "DeleteEmployee",
-    "RelativePath": "api/Employees/{id}",
+    "RelativePath": "api/Employees/remove/{id}",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
@@ -52,6 +52,27 @@
       {
         "Name": "id",
         "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "EmployeeApi.Models.EmployeesController",
+    "Method": "UpdateEmployee",
+    "RelativePath": "api/Employees/update/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "employee",
+        "Type": "EmployeeApi.Models.Employee",
         "IsRequired": true
       }
     ],
