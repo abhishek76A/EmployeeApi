@@ -3,6 +3,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Collections.Generic;
 using System;
+using Microsoft.AspNetCore.Mvc.Razor;
 
 namespace EmployeeApi.Models
 {
@@ -22,7 +23,7 @@ namespace EmployeeApi.Models
         public IActionResult GetEmployees()
         {
             var employees = new List<Employee>();
-            string query = "SELECT Id, Name, Salary, Created_by, Created_ts, Modified_by, Modified_ts, Flag, Active FROM Employees";
+            string query = "SELECT Id, Name, Salary, Created_by, Created_ts, Modified_by, Modified_ts, Flag, Active, ts FROM Employees";
 
             using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
@@ -43,7 +44,8 @@ namespace EmployeeApi.Models
                             Modified_by = reader.IsDBNull(5) ? null : reader.GetString(5),
                             Modified_ts = reader.IsDBNull(6) ? (DateTime?)null : reader.GetDateTime(6),
                             Flag = reader.GetString(7)[0],
-                            Active = reader.GetString(8)
+                            Active = reader.GetString(8),
+                            ts = reader.GetDateTime(9) // Mapping ts column
                         });
                     }
                 }
@@ -57,7 +59,7 @@ namespace EmployeeApi.Models
         public IActionResult GetEmployeeById(int id)
         {
             Employee employee = null;
-            string query = "SELECT Id, Name, Salary, Created_by, Created_ts, Modified_by, Modified_ts, Flag, Active FROM Employees WHERE Id = @Id";
+            string query = "SELECT Id, Name, Salary, Created_by, Created_ts, Modified_by, Modified_ts, Flag, Active, ts FROM Employees WHERE Id = @Id";
 
             using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
@@ -79,7 +81,8 @@ namespace EmployeeApi.Models
                             Modified_by = reader.IsDBNull(5) ? null : reader.GetString(5),
                             Modified_ts = reader.IsDBNull(6) ? (DateTime?)null : reader.GetDateTime(6),
                             Flag = reader.GetString(7)[0],
-                            Active = reader.GetString(8)
+                            Active = reader.GetString(8),
+                            ts = reader.GetDateTime(9) // Mapping ts column
                         };
                     }
                 }
@@ -95,7 +98,24 @@ namespace EmployeeApi.Models
         [HttpPost("add")]
         public IActionResult AddEmployee([FromBody] Employee employee)
         {
-            string query = "INSERT INTO Employees (Name, Salary, Created_by, Created_ts, Flag, Active) VALUES (@Name, @Salary, @Created_by, @Created_ts, @Flag, @Active)";
+            // Set default values for Modified_by and Modified_ts if they are not provided
+            if (string.IsNullOrEmpty(employee.Modified_by))
+            {
+                employee.Modified_by = "admin"; // Set this to the actual logged-in user if possible
+            }
+
+            if (employee.Modified_ts == null)
+            {
+                employee.Modified_ts = DateTime.UtcNow; // Current timestamp
+            }
+
+            if (employee.ts == default)
+            {
+                employee.ts = DateTime.UtcNow;  // Set current timestamp if ts is not provided
+            }
+
+            string query = "INSERT INTO Employees (Name, Salary, Created_by, Created_ts, Flag, Active, Modified_by, Modified_ts, ts) " +
+                           "VALUES (@Name, @Salary, @Created_by, @Created_ts, @Flag, @Active, @Modified_by, @Modified_ts, @ts)";
 
             using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
@@ -106,6 +126,9 @@ namespace EmployeeApi.Models
                 command.Parameters.AddWithValue("@Created_ts", employee.Created_ts);
                 command.Parameters.AddWithValue("@Flag", employee.Flag);
                 command.Parameters.AddWithValue("@Active", employee.Active);
+                command.Parameters.AddWithValue("@Modified_by", employee.Modified_by); // Default value "admin" will be used if not set
+                command.Parameters.AddWithValue("@Modified_ts", employee.Modified_ts); // Default value will be set
+                command.Parameters.AddWithValue("@ts", employee.ts);  // Add ts value
 
                 connection.Open();
                 command.ExecuteNonQuery();
@@ -139,7 +162,18 @@ namespace EmployeeApi.Models
         [HttpPut("update/{id}")]
         public IActionResult UpdateEmployee(int id, [FromBody] Employee employee)
         {
-            string updateQuery = "UPDATE Employees SET Name = @Name, Salary = @Salary, Modified_by = @Modified_by, Modified_ts = @Modified_ts, Flag = @Flag, Active = @Active WHERE Id = @Id";
+            // Validate Modified_by and Modified_ts fields
+            if (string.IsNullOrEmpty(employee.Modified_by))
+            {
+                return BadRequest(new { message = "Modified_by field is required." });
+            }
+
+            if (employee.Modified_ts == null)
+            {
+                return BadRequest(new { message = "Modified_ts cannot be null." });
+            }
+
+            string updateQuery = "UPDATE Employees SET Name = @Name, Salary = @Salary, Modified_by = @Modified_by, Modified_ts = @Modified_ts, Flag = @Flag, Active = @Active, ts = @ts WHERE Id = @Id";
 
             using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
@@ -147,10 +181,11 @@ namespace EmployeeApi.Models
                 command.Parameters.AddWithValue("@Id", id);
                 command.Parameters.AddWithValue("@Name", employee.Name);
                 command.Parameters.AddWithValue("@Salary", employee.Salary);
-                command.Parameters.AddWithValue("@Modified_by", employee.Modified_by);
-                command.Parameters.AddWithValue("@Modified_ts", employee.Modified_ts);
+                command.Parameters.AddWithValue("@Modified_by", employee.Modified_by); // Set from request body
+                command.Parameters.AddWithValue("@Modified_ts", employee.Modified_ts); // Set from request body
                 command.Parameters.AddWithValue("@Flag", employee.Flag);
                 command.Parameters.AddWithValue("@Active", employee.Active);
+                command.Parameters.AddWithValue("@ts", employee.ts); // Update ts field
 
                 connection.Open();
                 int rowsAffected = command.ExecuteNonQuery();
