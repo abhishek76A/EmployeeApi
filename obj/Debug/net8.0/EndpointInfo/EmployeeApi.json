@@ -220,6 +220,39 @@
           "ts": {
             "type": "string",
             "format": "date-time"
+          },
+          "contactInfo": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "department": {
+            "type": "string",
+            "nullable": true
+          },
+          "designation": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "dateOfJoining": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "assignedUsers": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "document_Link": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
